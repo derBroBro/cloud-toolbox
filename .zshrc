@@ -3,7 +3,7 @@ export ZSH=$HOME/.oh-my-zsh
 
 ZSH_THEME="agnoster"
 
-plugins=(ansible aws git helm kops kubectl oc terraform)
+plugins=(aws git helm kops kubectl terraform)
 
 source $ZSH/oh-my-zsh.sh
 

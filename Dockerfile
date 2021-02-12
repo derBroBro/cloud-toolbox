@@ -4,7 +4,6 @@ ARG UBUNTU_VERSION=20.04
 
 ARG DOCKER_VERSION="20.10.2"
 ARG KUBECTL_VERSION="1.20.2"
-ARG OC_CLI_VERSION="4.6"
 ARG HELM_VERSION="2.17.0"
 ARG HELM3_VERSION="3.5.1"
 ARG TERRAFORM_VERSION="0.12.30"
@@ -13,7 +12,6 @@ ARG TERRAFORM14_VERSION="0.14.5"
 ARG AWS_CLI_VERSION="1.18.223"
 ARG AZ_CLI_VERSION="2.18.0-1~focal"
 ARG GCLOUD_VERSION="325.0.0-0"
-ARG ANSIBLE_VERSION="2.10.6"
 ARG JINJA_VERSION="2.11.2"
 ARG OPENSSH_VERSION="8.4p1"
 ARG CRICTL_VERSION="1.20.0"
@@ -25,10 +23,9 @@ ARG MULTISTAGE_BUILDER_VERSION="2020-12-07"
 
 ######################################################### BUILDER ######################################################
 FROM ksandermann/multistage-builder:$MULTISTAGE_BUILDER_VERSION as builder
-MAINTAINER Kevin Sandermann <kevin.sandermann@gmail.com>
-LABEL maintainer="kevin.sandermann@gmail.com"
+MAINTAINER Kevin Sandermann <malte.brodersen@exoit.de>
+LABEL maintainer="malte.brodersen@exoit.de"
 
-ARG OC_CLI_VERSION
 ARG HELM_VERSION
 ARG HELM3_VERSION
 ARG TERRAFORM_VERSION
@@ -39,12 +36,6 @@ ARG KUBECTL_VERSION
 ARG CRICTL_VERSION
 ARG VAULT_VERSION
 ARG STERN_VERSION
-
-#download oc-cli
-WORKDIR /root/download
-RUN mkdir -p oc_cli && \
-    curl -SsL --retry 5 -o oc_cli.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/$OC_CLI_VERSION/linux/oc.tar.gz && \
-    tar xzvf oc_cli.tar.gz -C oc_cli
 
 #download helm-cli
 RUN mkdir helm2 && curl -SsL --retry 5 "https://get.helm.sh/helm-v$HELM_VERSION-linux-amd64.tar.gz" | tar xz -C ./helm2
@@ -112,13 +103,12 @@ RUN mkdir -p /root/download/stern && \
 ######################################################### IMAGE ########################################################
 
 FROM ubuntu:$UBUNTU_VERSION
-MAINTAINER Kevin Sandermann <kevin.sandermann@gmail.com>
-LABEL maintainer="kevin.sandermann@gmail.com"
+MAINTAINER Kevin Sandermann <malte.brodersen@exoit.de>
+LABEL maintainer="malte.brodersen@exoit.de"
 
 # tooling versions
 ARG OPENSSH_VERSION
 ARG KUBECTL_VERSION
-ARG ANSIBLE_VERSION
 ARG JINJA_VERSION
 ARG AZ_CLI_VERSION
 ARG AWS_CLI_VERSION
@@ -206,17 +196,14 @@ RUN wget "https://mirror.exonetric.net/pub/OpenBSD/OpenSSH/portable/openssh-${OP
     rm -rf ../openssh-${OPENSSH_VERSION}.tar.gz ../openssh-${OPENSSH_VERSION} && \
     ssh -V
 
-#install ansible + common requirements
+#install common requirements
 RUN pip3 install pip --upgrade
 RUN pip3 install cryptography
 RUN pip3 install \
-    ansible==${ANSIBLE_VERSION} \
-    ansible-lint \
     hvac \
     jinja2==${JINJA_VERSION} \
     jmespath \
     netaddr \
-    openshift \
     passlib \
     pbr \
     pip \
@@ -250,10 +237,12 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
     apt-get install -y \
     google-cloud-sdk=${GCLOUD_VERSION}
 
+#install code server
+RUN curl -fsSL https://code-server.dev/install.sh | sh
+
 #install binaries
 COPY --from=builder "/root/download/helm2/linux-amd64/helm" "/usr/local/bin/helm"
 COPY --from=builder "/root/download/helm3/linux-amd64/helm" "/usr/local/bin/helm3"
-COPY --from=builder "/root/download/oc_cli/oc" "/usr/local/bin/oc"
 COPY --from=builder "/root/download/terraform_cli/terraform" "/usr/local/bin/terraform"
 COPY --from=builder "/root/download/terraform13_cli/terraform" "/usr/local/bin/terraform13"
 COPY --from=builder "/root/download/terraform14_cli/terraform" "/usr/local/bin/terraform14"

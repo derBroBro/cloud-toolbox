@@ -14,9 +14,12 @@ alias unproxy='unset HTTP_PROXY && unset HTTPS_PROXY && unset http_proxy && unse
 
 #KUBECTL
 alias k='kubectl'
-alias ksn='kubectl config set-context $(kubectl config current-context) --namespace '
-alias kgc='kubectl config get-contexts'
-alias ksc='kubectl config use-context '
+
+#TERRAFORM
+alias t='terraform14'
+alias t14='terraform14'
+alias t13='terraform13'
+alias t12='terraform12'
 
 ######################################################## MOUNTED CAs ###################################################
 update-ca-certificates
