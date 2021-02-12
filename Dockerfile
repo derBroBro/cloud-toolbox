@@ -262,7 +262,6 @@ RUN chmod -R +x /usr/local/bin && \
     helm3 repo update && \
     kubectl version --client=true && \
     crictl --version && \
-    oc version --client && \
     terraform version && \
     terraform13 version && \
     terraform14 version && \
