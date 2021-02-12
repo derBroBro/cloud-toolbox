@@ -7,7 +7,7 @@ TOOLBOX_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
 #functions
 function startNewToolbox {
-  docker pull ksandermann/cloud-toolbox:$IMAGE_TAG
+  docker pull derbrobro/cloud-toolbox:$IMAGE_TAG
   docker run -ti --rm \
     --name toolbox \
     -v ~/.kube:/root/.kube \
@@ -22,12 +22,12 @@ function startNewToolbox {
     -v ~/ca-certificates:/usr/local/share/ca-certificates/extra \
     -v /var/run/docker.sock:/var/run/docker.sock \
     --env-file <(env | grep -i proxy) \
-    ksandermann/cloud-toolbox:$IMAGE_TAG \
+    derbrobro/cloud-toolbox:$IMAGE_TAG \
     /bin/zsh
 }
 
 function attachToToolbox {
-  docker exec -it toolbox /bin/bash
+  docker exec -it toolbox /bin/zsh
 }
 
 if [[ "$(docker ps -a | grep toolbox)" ]]
